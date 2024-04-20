@@ -1,0 +1,85 @@
+<packets name="RemoteDeploymentPackets" namespace="RemoteDeployment" size="111">
+
+    <import_topology>RemoteDeployment/Top/RemoteDeploymentTopologyAppAi.xml</import_topology>
+
+    <packet name="remote_CDH" id="1" level="1">
+        <channel name="remote_cmdDisp.CommandsDispatched"/>
+        <channel name="remote_rateGroup1.RgMaxTime"/>
+        <channel name="remote_rateGroup2.RgMaxTime"/>
+        <channel name="remote_rateGroup3.RgMaxTime"/>
+        <channel name="remote_fileUplink.FilesReceived"/>
+        <channel name="remote_fileUplink.PacketsReceived"/>
+        <channel name="remote_bufferManager.TotalBuffs"/>
+        <channel name="remote_bufferManager.CurrBuffs"/>
+        <channel name="remote_bufferManager.HiBuffs"/>
+        <channel name="remote_fileDownlink.FilesSent"/>
+        <channel name="remote_fileDownlink.PacketsSent"/>
+        <channel name="remote_fileManager.CommandsExecuted"/>
+        <!-- Uncomment to use Svc::TlmPacketizer -->
+        <!--channel name="remote_tlmSend.SendLevel"/-->
+    </packet>
+
+    <packet name="remote_CDHErrors" id="2" level="1">
+        <channel name="remote_rateGroup1.RgCycleSlips"/>
+        <channel name="remote_rateGroup2.RgCycleSlips"/>
+        <channel name="remote_rateGroup3.RgCycleSlips"/>
+        <channel name="remote_fileUplink.Warnings"/>
+        <channel name="remote_fileDownlink.Warnings"/>
+        <!-- <channel name="remote_health.PingLateWarnings"/> -->
+        <channel name="remote_fileManager.Errors"/>
+        <channel name="remote_bufferManager.NoBuffs"/>
+        <channel name="remote_bufferManager.EmptyBuffs"/>
+        <channel name="remote_fileManager.Errors"/>
+    </packet>
+
+    <packet name="remote_DriveTlm" id="3" level="1">
+        <channel name="remote_blockDrv.BD_Cycles"/>
+    </packet>
+
+    <packet name="remote_Comms" id="4" level="1">
+        <channel name="remote_comQueue.comQueueDepth"/>
+        <channel name="remote_comQueue.buffQueueDepth"/>
+    </packet>
+
+    <packet name="remote_SystemRes1" id="5" level="2">
+        <channel name="remote_systemResources.MEMORY_TOTAL"/>
+        <channel name="remote_systemResources.MEMORY_USED"/>
+        <channel name="remote_systemResources.NON_VOLATILE_TOTAL"/>
+        <channel name="remote_systemResources.NON_VOLATILE_FREE"/>
+    </packet>
+
+    <packet name="remote_SystemRes2" id="6" level="2">
+        <channel name="remote_systemResources.FRAMEWORK_VERSION"/>
+        <channel name="remote_systemResources.PROJECT_VERSION"/>
+    </packet>
+
+    <packet name="remote_SystemRes3" id="7" level="2">
+        <channel name="remote_systemResources.CPU"/>
+        <channel name="remote_systemResources.CPU_00"/>
+        <channel name="remote_systemResources.CPU_01"/>
+        <channel name="remote_systemResources.CPU_02"/>
+        <channel name="remote_systemResources.CPU_03"/>
+        <channel name="remote_systemResources.CPU_04"/>
+        <channel name="remote_systemResources.CPU_05"/>
+        <channel name="remote_systemResources.CPU_06"/>
+        <channel name="remote_systemResources.CPU_07"/>
+        <channel name="remote_systemResources.CPU_08"/>
+        <channel name="remote_systemResources.CPU_09"/>
+        <channel name="remote_systemResources.CPU_10"/>
+        <channel name="remote_systemResources.CPU_11"/>
+        <channel name="remote_systemResources.CPU_12"/>
+        <channel name="remote_systemResources.CPU_13"/>
+        <channel name="remote_systemResources.CPU_14"/>
+        <channel name="remote_systemResources.CPU_15"/>
+    </packet>
+
+    <!-- Ignored packets -->
+
+    <ignore>
+        <channel name="remote_cmdDisp.CommandErrors"/>
+        <channel name="remote_comDriver.BytesSent"/>
+        <channel name="remote_comDriver.BytesRecv"/>
+        <channel name="remote_hubDriver.BytesSent"/>
+        <channel name="remote_hubDriver.BytesRecv"/>
+    </ignore>
+</packets>
