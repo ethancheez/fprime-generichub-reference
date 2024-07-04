@@ -24,6 +24,7 @@ module LocalDeployment {
     # Instances used in the topology
     # ----------------------------------------------------------------------
 
+    instance bufferManager
     instance cmdDisp
     instance commDriver
     instance commQueue
@@ -92,10 +93,10 @@ module LocalDeployment {
       commQueue.comQueueSend -> framer.comIn
       commQueue.buffQueueSend -> framer.bufferIn
 
-      framer.framedAllocate -> staticMemory.bufferAllocate[Ports_StaticMemory.framer]
+      framer.framedAllocate -> bufferManager.bufferGetCallee
       framer.framedOut -> commStub.comDataIn
       commStub.drvDataOut -> commDriver.$send
-      commDriver.deallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.framer]
+      commDriver.deallocate -> bufferManager.bufferSendIn
       commDriver.ready -> commStub.drvConnected
       commStub.comStatus -> commQueue.comStatusIn
 
@@ -103,37 +104,37 @@ module LocalDeployment {
     
     connections Uplink {
 
-      commDriver.allocate -> staticMemory.bufferAllocate[Ports_StaticMemory.deframer]
+      commDriver.allocate -> bufferManager.bufferGetCallee
       commDriver.$recv -> commStub.drvDataIn
       commStub.comDataOut -> deframer.framedIn
-      deframer.framedDeallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.deframer]
+      deframer.framedDeallocate -> bufferManager.bufferSendIn
 
       deframer.comOut -> cmdSplitter.CmdBuff
       cmdSplitter.LocalCmd -> cmdDisp.seqCmdBuff
       cmdDisp.seqCmdStatus -> cmdSplitter.seqCmdStatus
       cmdSplitter.forwardSeqCmdStatus -> deframer.cmdResponseIn
 
-      deframer.bufferAllocate -> staticMemory.bufferAllocate[Ports_StaticMemory.deframing]
-      deframer.bufferDeallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.deframing]
+      deframer.bufferAllocate -> bufferManager.bufferGetCallee
+      deframer.bufferDeallocate -> bufferManager.bufferSendIn
       
     }
 
     connections HubToDriver {
       # Hub -> Framer -> Uart Driver
-      hub.dataOutAllocate -> staticMemory.bufferAllocate[Ports_StaticMemory.hub]
+      hub.dataOutAllocate -> bufferManager.bufferGetCallee
       hub.dataOut -> hubFramer.bufferIn
-      hubFramer.bufferDeallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.hub]
-      hubFramer.framedAllocate -> staticMemory.bufferAllocate[Ports_StaticMemory.hubFramer]
+      hubFramer.bufferDeallocate -> bufferManager.bufferSendIn
+      hubFramer.framedAllocate -> bufferManager.bufferGetCallee
       hubFramer.framedOut -> hubCommDriver.$send
-      hubCommDriver.deallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.hubFramer]
+      hubCommDriver.deallocate -> bufferManager.bufferSendIn
 
       # Uart Driver -> Deframer -> Hub
-      hubCommDriver.allocate -> staticMemory.bufferAllocate[Ports_StaticMemory.hubCommDriver]
+      hubCommDriver.allocate -> bufferManager.bufferGetCallee
       hubCommDriver.$recv -> hubDeframer.framedIn
-      hubDeframer.framedDeallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.hubCommDriver]
-      hubDeframer.bufferAllocate -> staticMemory.bufferAllocate[Ports_StaticMemory.hubDeframer]
+      hubDeframer.framedDeallocate -> bufferManager.bufferSendIn
+      hubDeframer.bufferAllocate -> bufferManager.bufferGetCallee
       hubDeframer.bufferOut -> hub.dataIn
-      hub.dataInDeallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.hubDeframer]
+      hub.dataInDeallocate -> bufferManager.bufferSendIn
     }
 
 

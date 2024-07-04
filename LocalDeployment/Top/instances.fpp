@@ -67,6 +67,8 @@ module LocalDeployment {
 
   instance rateDriver: Arduino.HardwareRateDriver base id 0x4A00
 
+  instance bufferManager: Svc.BufferManager base id 0x4B00
+
   # Hub
 
   instance cmdSplitter: Svc.CmdSplitter base id 0x10000

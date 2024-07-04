@@ -76,16 +76,16 @@ module RemoteDeployment {
 
       # Rate group 1
       remote_rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup1] -> remote_rateGroup1.CycleIn
-      # remote_rateGroup1.RateGroupMemberOut[0] -> remote_blockDrv.Sched
-      # remote_rateGroup1.RateGroupMemberOut[1] -> remote_bufferManager.schedIn
-      remote_rateGroup1.RateGroupMemberOut[0] -> remote_fileDownlink.Run
+      remote_rateGroup1.RateGroupMemberOut[0] -> remote_blockDrv.Sched
+      remote_rateGroup1.RateGroupMemberOut[1] -> remote_bufferManager.schedIn
+      remote_rateGroup1.RateGroupMemberOut[2] -> remote_fileDownlink.Run
 
       # Rate group 2
       remote_rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup2] -> remote_rateGroup2.CycleIn
 
       # Rate group 3
       remote_rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup3] -> remote_rateGroup3.CycleIn
-      # remote_rateGroup3.RateGroupMemberOut[0] -> remote_systemResources.run
+      remote_rateGroup3.RateGroupMemberOut[0] -> remote_systemResources.run
       # remote_rateGroup3.RateGroupMemberOut[0] -> remote_health.Run
     }
 

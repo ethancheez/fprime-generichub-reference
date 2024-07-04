@@ -507,6 +507,14 @@
         <arg name="version" description="version string" len="40" type="string"/>
       </args>
     </event>
+    <event component="bufferManager" name="NoBuffsAvailable" id="0x4b00" severity="WARNING_HI" description="The BufferManager was unable to allocate a requested buffer" format_string="No available buffers of size %u">
+      <args>
+        <arg name="size" description="The requested size" type="U32"/>
+      </args>
+    </event>
+    <event component="bufferManager" name="ZeroSizeBuffer" id="0x4b01" severity="WARNING_HI" description="The buffer manager received a zero-sized buffer as a return. Probably undetected empty buffer allocation" format_string="Received zero size buffer">
+      <args/>
+    </event>
     <event component="remote_rateGroup1" name="RateGroupStarted" id="0x10000200" severity="DIAGNOSTIC" description="Informational event that rate group has started" format_string="Rate group started.">
       <args/>
     </event>
@@ -1097,6 +1105,11 @@
     <channel component="systemResources" name="CPU_15" id="0x4914" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
     <channel component="systemResources" name="FRAMEWORK_VERSION" id="0x4915" description="Software framework version" len="40" type="string"/>
     <channel component="systemResources" name="PROJECT_VERSION" id="0x4916" description="Software project version" len="40" type="string"/>
+    <channel component="bufferManager" name="TotalBuffs" id="0x4b00" description="The total buffers allocated" type="U32"/>
+    <channel component="bufferManager" name="CurrBuffs" id="0x4b01" description="The current number of allocated buffers" type="U32"/>
+    <channel component="bufferManager" name="HiBuffs" id="0x4b02" description="The high water mark of allocated buffers" type="U32"/>
+    <channel component="bufferManager" name="NoBuffs" id="0x4b03" description="The number of requests that couldn't return a buffer" high_red="1" type="U32"/>
+    <channel component="bufferManager" name="EmptyBuffs" id="0x4b04" description="The number of empty buffers returned" high_red="1" type="U32"/>
     <channel component="remote_blockDrv" name="BD_Cycles" id="0x10000100" description="Driver cycle count" type="U32"/>
     <channel component="remote_rateGroup1" name="RgMaxTime" id="0x10000200" format_string="%u us" description="Max execution time rate group" type="U32"/>
     <channel component="remote_rateGroup1" name="RgCycleSlips" id="0x10000201" description="Cycle slips for rate group" type="U32"/>
