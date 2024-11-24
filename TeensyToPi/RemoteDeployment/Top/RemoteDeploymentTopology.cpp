@@ -4,24 +4,22 @@
 //
 // ======================================================================
 // Provides access to autocoded functions
-#include <RemoteDeployment/Top/RemoteDeploymentTopologyAc.hpp>
-#include <RemoteDeployment/Top/RemoteDeploymentPacketsAc.hpp>
-
-#include <Utils/Hash/HashConfig.hpp>
+#include <TeensyToPi/RemoteDeployment/Top/RemoteDeploymentTopologyAc.hpp>
+// Note: Uncomment when using Svc:TlmPacketizer
+//#include <RemoteDeployment/Top/RemoteDeploymentPacketsAc.hpp>
 
 // Necessary project-specified types
 #include <Fw/Types/MallocAllocator.hpp>
-#include <Os/Log.hpp>
 #include <Svc/FramingProtocol/FprimeProtocol.hpp>
+#include <Utils/Hash/HashConfig.hpp>
 
 // Used for 1Hz synthetic cycling
 #include <Os/Mutex.hpp>
 
+#include <Fw/Logger/Logger.hpp>
+
 // Allows easy reference to objects in FPP/autocoder required namespaces
 using namespace RemoteDeployment;
-
-// Instantiate a system logger that will handle Fw::Logger::logMsg calls
-Os::Log logger;
 
 // The reference topology uses a malloc-based allocator for components that need to allocate memory during the
 // initialization phase.
@@ -64,18 +62,18 @@ enum TopologyConstants {
 
 // Ping entries are autocoded, however; this code is not properly exported. Thus, it is copied here.
 Svc::Health::PingEntry pingEntries[] = {
-    {PingEntries::remote_blockDrv::WARN, PingEntries::remote_blockDrv::FATAL, "remote_blockDrv"},
-    {PingEntries::remote_tlmSend::WARN, PingEntries::remote_tlmSend::FATAL, "remote_chanTlm"},
-    {PingEntries::remote_cmdDisp::WARN, PingEntries::remote_cmdDisp::FATAL, "remote_cmdDisp"},
-    {PingEntries::remote_cmdSeq::WARN, PingEntries::remote_cmdSeq::FATAL, "remote_cmdSeq"},
-    {PingEntries::remote_eventLogger::WARN, PingEntries::remote_eventLogger::FATAL, "remote_eventLogger"},
-    {PingEntries::remote_fileDownlink::WARN, PingEntries::remote_fileDownlink::FATAL, "remote_fileDownlink"},
-    {PingEntries::remote_fileManager::WARN, PingEntries::remote_fileManager::FATAL, "remote_fileManager"},
-    {PingEntries::remote_fileUplink::WARN, PingEntries::remote_fileUplink::FATAL, "remote_fileUplink"},
-    {PingEntries::remote_prmDb::WARN, PingEntries::remote_prmDb::FATAL, "remote_prmDb"},
-    {PingEntries::remote_rateGroup1::WARN, PingEntries::remote_rateGroup1::FATAL, "remote_rateGroup1"},
-    {PingEntries::remote_rateGroup2::WARN, PingEntries::remote_rateGroup2::FATAL, "remote_rateGroup2"},
-    {PingEntries::remote_rateGroup3::WARN, PingEntries::remote_rateGroup3::FATAL, "remote_rateGroup3"},
+    {PingEntries::RemoteDeployment_blockDrv::WARN, PingEntries::RemoteDeployment_blockDrv::FATAL, "blockDrv"},
+    {PingEntries::RemoteDeployment_tlmSend::WARN, PingEntries::RemoteDeployment_tlmSend::FATAL, "chanTlm"},
+    {PingEntries::RemoteDeployment_cmdDisp::WARN, PingEntries::RemoteDeployment_cmdDisp::FATAL, "cmdDisp"},
+    {PingEntries::RemoteDeployment_cmdSeq::WARN, PingEntries::RemoteDeployment_cmdSeq::FATAL, "cmdSeq"},
+    {PingEntries::RemoteDeployment_eventLogger::WARN, PingEntries::RemoteDeployment_eventLogger::FATAL, "eventLogger"},
+    {PingEntries::RemoteDeployment_fileDownlink::WARN, PingEntries::RemoteDeployment_fileDownlink::FATAL, "fileDownlink"},
+    {PingEntries::RemoteDeployment_fileManager::WARN, PingEntries::RemoteDeployment_fileManager::FATAL, "fileManager"},
+    {PingEntries::RemoteDeployment_fileUplink::WARN, PingEntries::RemoteDeployment_fileUplink::FATAL, "fileUplink"},
+    {PingEntries::RemoteDeployment_prmDb::WARN, PingEntries::RemoteDeployment_prmDb::FATAL, "prmDb"},
+    {PingEntries::RemoteDeployment_rateGroup1::WARN, PingEntries::RemoteDeployment_rateGroup1::FATAL, "rateGroup1"},
+    {PingEntries::RemoteDeployment_rateGroup2::WARN, PingEntries::RemoteDeployment_rateGroup2::FATAL, "rateGroup2"},
+    {PingEntries::RemoteDeployment_rateGroup3::WARN, PingEntries::RemoteDeployment_rateGroup3::FATAL, "rateGroup3"},
 };
 
 /**
@@ -98,8 +96,8 @@ void configureTopology() {
     remote_bufferManager.setup(BUFFER_MANAGER_ID, 0, mallocator, upBuffMgrBins);
 
     // Framer and Deframer components need to be passed a protocol handler
-    remote_framer.setup(framing);
-    remote_deframer.setup(deframing);
+    remote_hubFramer.setup(framing);
+    remote_hubDeframer.setup(deframing);
 
     // Rate group driver needs a divisor list
     remote_rateGroupDriver.configure(rateGroupDivisorsSet);
@@ -116,9 +114,6 @@ void configureTopology() {
     // Parameter database is configured with a database file name, and that file must be initially read.
     remote_prmDb.configure("PrmDb.dat");
     remote_prmDb.readParamFile();
-
-    // Health is supplied a set of ping entires.
-    // remote_health.setPingEntries(pingEntries, FW_NUM_ARRAY_ELEMENTS(pingEntries), HEALTH_WATCHDOG_CODE);
 
     // Note: Uncomment when using Svc:TlmPacketizer
     // tlmSend.setPacketList(RemoteDeploymentPacketsPkts, RemoteDeploymentPacketsIgnore, 1);
@@ -142,20 +137,22 @@ void setupTopology(const TopologyState& state) {
     setBaseIds();
     // Autocoded connection wiring. Function provided by autocoder.
     connectComponents();
-    // Project-specific component configuration. Function provided above. May be inlined, if desired.
+    // Autocoded configuration. Function provided by autocoder.
+    configComponents(state);
+    // Deployment-specific component configuration. Function provided above. May be inlined, if desired.
     configureTopology();
-    // Autocoded parameter loading. Function provided by autocoder.
-    // loadParameters();
     // Autocoded command registration. Function provided by autocoder.
     regCommands();
+    // Autocoded parameter loading. Function provided by autocoder.
+    // loadParameters();
     // Autocoded task kick-off (active components). Function provided by autocoder.
     startTasks(state);
     if (state.uartDevice != nullptr) {
         Os::TaskString name("ReceiveTask");
         // Uplink is configured for receive so a socket task is started
-        if (remote_comDriver.open(state.uartDevice, static_cast<Drv::LinuxUartDriver::UartBaudRate>(state.baudRate), 
+        if (remote_hubDriver.open(state.uartDevice, static_cast<Drv::LinuxUartDriver::UartBaudRate>(state.baudRate), 
                            Drv::LinuxUartDriver::NO_FLOW, Drv::LinuxUartDriver::PARITY_NONE, Svc::DeframerCfg::RING_BUFFER_SIZE)) {
-            remote_comDriver.startReadThread(COMM_PRIORITY, Default::STACK_SIZE);
+            remote_hubDriver.start(COMM_PRIORITY, Default::STACK_SIZE);
         } else {
             printf("Failed to open UART device %s at baud rate %" PRIu32 "\n", state.uartDevice, state.baudRate);
         }
@@ -166,7 +163,7 @@ void setupTopology(const TopologyState& state) {
 Os::Mutex cycleLock;
 volatile bool cycleFlag = true;
 
-void startSimulatedCycle(U32 milliseconds) {
+void startSimulatedCycle(Fw::TimeInterval interval) {
     cycleLock.lock();
     bool cycling = cycleFlag;
     cycleLock.unLock();
@@ -174,7 +171,7 @@ void startSimulatedCycle(U32 milliseconds) {
     // Main loop
     while (cycling) {
         RemoteDeployment::remote_blockDrv.callIsr();
-        Os::Task::delay(milliseconds);
+        Os::Task::delay(interval);
 
         cycleLock.lock();
         cycling = cycleFlag;
@@ -194,8 +191,8 @@ void teardownTopology(const TopologyState& state) {
     freeThreads(state);
 
     // Other task clean-up.
-    remote_comDriver.quitReadThread();
-    (void)remote_comDriver.join(nullptr);
+    remote_hubDriver.quitReadThread();
+    (void)remote_hubDriver.join();
 
     // Resource deallocation
     remote_bufferManager.cleanup();

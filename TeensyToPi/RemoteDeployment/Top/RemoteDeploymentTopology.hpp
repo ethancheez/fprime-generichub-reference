@@ -7,7 +7,7 @@
 #define REMOTEDEPLOYMENT_REMOTEDEPLOYMENTTOPOLOGY_HPP
 // Included for access to RemoteDeployment::TopologyState and RemoteDeployment::ConfigObjects::pingEntries. These definitions are required by the
 // autocoder, but are also used in this hand-coded topology.
-#include <RemoteDeployment/Top/RemoteDeploymentTopologyDefs.hpp>
+#include <TeensyToPi/RemoteDeployment/Top/RemoteDeploymentTopologyDefs.hpp>
 
 // Remove unnecessary RemoteDeployment:: qualifications
 using namespace RemoteDeployment;
@@ -73,7 +73,7 @@ void teardownTopology(const TopologyState& state);
  *
  * \param milliseconds: milliseconds to delay for each cycle. Default: 1000 or 1Hz.
  */
-void startSimulatedCycle(U32 milliseconds = 1000);
+void startSimulatedCycle(Fw::TimeInterval interval = Fw::TimeInterval(1,0));
 
 /**
  * \brief stop the simulated cycle started by startSimulatedCycle

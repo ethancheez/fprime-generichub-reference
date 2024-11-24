@@ -1,6 +1,6 @@
-<packets name="NativePiDeploymentPackets" namespace="NativePiDeployment" size="111">
+<packets name="RemoteDeploymentPackets" namespace="RemoteDeployment" size="111">
 
-    <import_topology>NativePiDeployment/Top/NativePiDeploymentTopologyAppAi.xml</import_topology>
+    <import_topology>RemoteDeployment/Top/RemoteDeploymentTopologyAppAi.xml</import_topology>
 
     <packet name="CDH" id="1" level="1">
         <channel name="cmdDisp.CommandsDispatched"/>
@@ -53,12 +53,7 @@
         <channel name="systemResources.NON_VOLATILE_FREE"/>
     </packet>
 
-    <packet name="SystemRes2" id="6" level="2">
-        <channel name="systemResources.FRAMEWORK_VERSION"/>
-        <channel name="systemResources.PROJECT_VERSION"/>
-    </packet>
-
-    <packet name="SystemRes3" id="7" level="2">
+    <packet name="SystemRes2" id="7" level="2">
         <channel name="systemResources.CPU"/>
         <channel name="systemResources.CPU_00"/>
         <channel name="systemResources.CPU_01"/>
@@ -82,5 +77,7 @@
 
     <ignore>
         <channel name="cmdDisp.CommandErrors"/>
+        <channel name="comDriver.BytesSent"/>
+        <channel name="comDriver.BytesRecv"/>
     </ignore>
 </packets>

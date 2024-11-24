@@ -8,16 +8,6 @@ module LocalDeployment {
       rateGroup1
     }
 
-    enum Ports_StaticMemory {
-      framer
-      deframer
-      deframing
-      hub
-      hubFramer
-      hubDeframer
-      hubCommDriver
-    }
-
   topology LocalDeployment {
 
     # ----------------------------------------------------------------------
@@ -31,13 +21,11 @@ module LocalDeployment {
     instance commStub
     instance deframer
     instance eventLogger
-    instance fatalAdapter
     instance fatalHandler
     instance framer
     instance rateDriver
     instance rateGroup1
     instance rateGroupDriver
-    instance staticMemory
     instance systemResources
     instance textLogger
     instance timeHandler
@@ -78,11 +66,10 @@ module LocalDeployment {
       rateGroup1.RateGroupMemberOut[1] -> hubCommDriver.schedIn
       rateGroup1.RateGroupMemberOut[2] -> tlmSend.Run
       rateGroup1.RateGroupMemberOut[3] -> systemResources.run
-      rateGroup1.RateGroupMemberOut[4] -> commQueue.run
     }
 
     connections FaultProtection {
-      eventLogger.FatalAnnounce -> fatalHandler.FatalReceive
+      # eventLogger.FatalAnnounce -> fatalHandler.FatalReceive
     }
 
     connections Downlink {
@@ -137,7 +124,6 @@ module LocalDeployment {
       hub.dataInDeallocate -> bufferManager.bufferSendIn
     }
 
-
     connections HubToDeployment {
       hub.LogSend -> eventLogger.LogRecv
       hub.TlmSend -> tlmSend.TlmRecv
@@ -147,6 +133,10 @@ module LocalDeployment {
 
       hub.portOut[1] -> commQueue.buffQueueIn[0]
       framer.bufferDeallocate -> hub.portIn[1]
+
+      # File Uplink
+      deframer.bufferOut -> hub.portIn[2]
+      hub.portOut[2] -> bufferManager.bufferSendIn
     }
 
     connections LocalDeployment {

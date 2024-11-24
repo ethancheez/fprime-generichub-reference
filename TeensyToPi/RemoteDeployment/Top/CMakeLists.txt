@@ -7,16 +7,17 @@
 
 set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/instances.fpp"
-  "${CMAKE_CURRENT_LIST_DIR}/NativePiDeploymentPackets.xml"
+  # Note: Uncomment when using Svc:TlmPacketizer
+  #"${CMAKE_CURRENT_LIST_DIR}/RemoteDeploymentPackets.xml"
   "${CMAKE_CURRENT_LIST_DIR}/topology.fpp"
-  "${CMAKE_CURRENT_LIST_DIR}/NativePiDeploymentTopology.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/RemoteDeploymentTopology.cpp"
 )
 set(MOD_DEPS
   Fw/Logger
   Svc/PosixTime
   # Communication Implementations
   Drv/Udp
-  Drv/TcpClient
+  Drv/LinuxUartDriver
 )
 
 register_fprime_module()

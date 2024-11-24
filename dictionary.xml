@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<dictionary topology="LocalDeployment" framework_version="3.4.3" project_version="3.4.3">
+<dictionary topology="LocalDeployment" framework_version="3.5.0" project_version="3.5.0">
   <enums>
     <enum type="Fw::DeserialStatus" serialize_type="I32">
       <item name="OK" value="0" description=""/>
@@ -27,6 +27,12 @@
     <enum type="Svc::SystemResourceEnabled" serialize_type="I32">
       <item name="DISABLED" value="0" description=""/>
       <item name="ENABLED" value="1" description=""/>
+    </enum>
+    <enum type="Drv::GpioStatus" serialize_type="I32">
+      <item name="OP_OK" value="0" description="Operation succeeded"/>
+      <item name="NOT_OPENED" value="1" description="Pin was never opened"/>
+      <item name="INVALID_MODE" value="2" description="Operation not permitted with current configuration"/>
+      <item name="UNKNOWN_ERROR" value="3" description="An unknown error occurred"/>
     </enum>
     <enum type="Fw::Logic" serialize_type="I32">
       <item name="LOW" value="0" description="Logic low state"/>
@@ -57,7 +63,8 @@
     </enum>
     <enum type="Drv::RecvStatus" serialize_type="I32">
       <item name="RECV_OK" value="0" description="Receive worked as expected"/>
-      <item name="RECV_ERROR" value="1" description="Receive error occurred retrying may succeed"/>
+      <item name="RECV_NO_DATA" value="1" description="Receive worked, but there was no data"/>
+      <item name="RECV_ERROR" value="2" description="Receive error occurred retrying may succeed"/>
     </enum>
     <enum type="Fw::CmdResponse" serialize_type="I32">
       <item name="OK" value="0" description="Command successfully executed"/>
@@ -173,15 +180,34 @@
     <command component="eventLogger" mnemonic="DUMP_FILTER_STATE" opcode="0x203" description="Dump the filter states via events">
       <args/>
     </command>
-    <command component="systemResources" mnemonic="ENABLE" opcode="0x4900" description="A command to enable or disable system resource telemetry">
+    <command component="timeHandler" mnemonic="SET_TIME" opcode="0x4300" description="Command to set the time">
+      <args>
+        <arg name="year" description="
+          The current year
+          " type="U32"/>
+        <arg name="month" description="
+          The current month (1-12)
+          " type="U8"/>
+        <arg name="day" description="
+          The current day (1-31)
+          " type="U8"/>
+        <arg name="hour" description="
+          The current hour (0-23)
+          " type="U8"/>
+        <arg name="minute" description="
+          The current minute (0-59)
+          " type="U8"/>
+        <arg name="second" description="
+          The current second (0-59)
+          " type="U8"/>
+      </args>
+    </command>
+    <command component="systemResources" mnemonic="ENABLE" opcode="0x4700" description="A command to enable or disable system resource telemetry">
       <args>
         <arg name="enable" description="
           whether or not system resource telemetry is enabled
           " type="Svc::SystemResourceEnabled"/>
       </args>
-    </command>
-    <command component="systemResources" mnemonic="VERSION" opcode="0x4901" description="Report version as EVR">
-      <args/>
     </command>
     <command component="remote_cmdDisp" mnemonic="CMD_NO_OP" opcode="0x10000500" description="No-op command">
       <args/>
@@ -330,9 +356,6 @@
           " type="Svc::SystemResourceEnabled"/>
       </args>
     </command>
-    <command component="remote_systemResources" mnemonic="VERSION" opcode="0x10004a01" description="Report version as EVR">
-      <args/>
-    </command>
   </commands>
   <events>
     <event component="cmdDisp" name="OpCodeRegistered" id="0x100" severity="DIAGNOSTIC" format_string="Opcode 0x%x registered to port %d slot %d">
@@ -427,93 +450,23 @@
         <arg name="index" description="index of overflowed queue" type="U32"/>
       </args>
     </event>
-    <event component="fatalAdapter" name="AF_ASSERT_0" id="0x4200" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-      </args>
-    </event>
-    <event component="fatalAdapter" name="AF_ASSERT_1" id="0x4201" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="fatalAdapter" name="AF_ASSERT_2" id="0x4202" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="fatalAdapter" name="AF_ASSERT_3" id="0x4203" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-        <arg name="arg3" description="Third assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="fatalAdapter" name="AF_ASSERT_4" id="0x4204" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-        <arg name="arg3" description="Third assert argument" type="U32"/>
-        <arg name="arg4" description="Fourth assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="fatalAdapter" name="AF_ASSERT_5" id="0x4205" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u %u %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-        <arg name="arg3" description="Third assert argument" type="U32"/>
-        <arg name="arg4" description="Fourth assert argument" type="U32"/>
-        <arg name="arg5" description="Fifth assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="fatalAdapter" name="AF_ASSERT_6" id="0x4206" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u %u %u %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-        <arg name="arg3" description="Third assert argument" type="U32"/>
-        <arg name="arg4" description="Fourth assert argument" type="U32"/>
-        <arg name="arg5" description="Fifth assert argument" type="U32"/>
-        <arg name="arg6" description="Sixth assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="fatalAdapter" name="AF_UNEXPECTED_ASSERT" id="0x4207" severity="FATAL" description="An unexpected assert happened" format_string="Unexpected assert in file %s, line %u, args %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="numArgs" description="Number of unexpected arguments" type="U32"/>
-      </args>
-    </event>
-    <event component="systemResources" name="FRAMEWORK_VERSION" id="0x4900" severity="ACTIVITY_LO" description="Version of the git repository." format_string="Framework Version: [%s]">
-      <args>
-        <arg name="version" description="version string" len="40" type="string"/>
-      </args>
-    </event>
-    <event component="systemResources" name="PROJECT_VERSION" id="0x4901" severity="ACTIVITY_LO" description="Version of the git repository." format_string="Project Version: [%s]">
-      <args>
-        <arg name="version" description="version string" len="40" type="string"/>
-      </args>
-    </event>
-    <event component="bufferManager" name="NoBuffsAvailable" id="0x4b00" severity="WARNING_HI" description="The BufferManager was unable to allocate a requested buffer" format_string="No available buffers of size %u">
+    <event component="bufferManager" name="NoBuffsAvailable" id="0x2000" severity="WARNING_HI" description="The BufferManager was unable to allocate a requested buffer" format_string="No available buffers of size %u">
       <args>
         <arg name="size" description="The requested size" type="U32"/>
       </args>
     </event>
-    <event component="bufferManager" name="ZeroSizeBuffer" id="0x4b01" severity="WARNING_HI" description="The buffer manager received a zero-sized buffer as a return. Probably undetected empty buffer allocation" format_string="Received zero size buffer">
+    <event component="bufferManager" name="ZeroSizeBuffer" id="0x2001" severity="WARNING_HI" description="The buffer manager received a zero-sized buffer as a return. Probably undetected empty buffer allocation" format_string="Received zero size buffer">
       <args/>
+    </event>
+    <event component="timeHandler" name="TimeUpdate" id="0x4300" severity="ACTIVITY_HI" description="Command to set the time" format_string="Time updated from %u.%u (%u) to %u.%u (%u)">
+      <args>
+        <arg name="original_seconds" description="The seconds before the time update" type="U32"/>
+        <arg name="original_microseconds" description="The microseconds before the time update" type="U32"/>
+        <arg name="original_base" description="The time base before the update" type="U8"/>
+        <arg name="new_seconds" description="The seconds after the time update" type="U32"/>
+        <arg name="new_microseconds" description="The microseconds after the time update" type="U32"/>
+        <arg name="new_base" description="The time base adter the update" type="U8"/>
+      </args>
     </event>
     <event component="remote_rateGroup1" name="RateGroupStarted" id="0x10000200" severity="DIAGNOSTIC" description="Informational event that rate group has started" format_string="Rate group started.">
       <args/>
@@ -901,118 +854,6 @@
         <arg name="records" description="The number of records loaded" type="U32"/>
       </args>
     </event>
-    <event component="remote_comDriver" name="OpenError" id="0x10004000" severity="WARNING_HI" description="UART open error" format_string="Error opening UART device %s: %d %s">
-      <args>
-        <arg name="device" description="The device" len="40" type="string"/>
-        <arg name="error" description="The error code" type="I32"/>
-        <arg name="name" description="error string" len="40" type="string"/>
-      </args>
-    </event>
-    <event component="remote_comDriver" name="ConfigError" id="0x10004001" severity="WARNING_HI" description="UART config error" format_string="Error configuring UART device %s: %d">
-      <args>
-        <arg name="device" description="The device" len="40" type="string"/>
-        <arg name="error" description="The error code" type="I32"/>
-      </args>
-    </event>
-    <event component="remote_comDriver" name="WriteError" id="0x10004002" severity="WARNING_HI" description="UART write error" format_string="Error writing UART device %s: %d">
-      <args>
-        <arg name="device" description="The device" len="40" type="string"/>
-        <arg name="error" description="The error code" type="I32"/>
-      </args>
-    </event>
-    <event component="remote_comDriver" name="ReadError" id="0x10004003" severity="WARNING_HI" description="UART read error" format_string="Error reading UART device %s: %d">
-      <args>
-        <arg name="device" description="The device" len="40" type="string"/>
-        <arg name="error" description="The error code" type="I32"/>
-      </args>
-    </event>
-    <event component="remote_comDriver" name="PortOpened" id="0x10004004" severity="ACTIVITY_HI" description="UART port opened event" format_string="UART Device %s configured">
-      <args>
-        <arg name="device" description="The device" len="40" type="string"/>
-      </args>
-    </event>
-    <event component="remote_comDriver" name="NoBuffers" id="0x10004005" severity="WARNING_HI" description="UART ran out of buffers" format_string="UART Device %s ran out of buffers">
-      <args>
-        <arg name="device" description="The device" len="40" type="string"/>
-      </args>
-    </event>
-    <event component="remote_comDriver" name="BufferTooSmall" id="0x10004006" severity="WARNING_HI" description="UART ran out of buffers" format_string="UART Device %s target buffer too small. Size: %u Needs: %u">
-      <args>
-        <arg name="device" description="The device" len="40" type="string"/>
-        <arg name="size" description="The provided buffer size" type="U32"/>
-        <arg name="needed" description="The buffer size needed" type="U32"/>
-      </args>
-    </event>
-    <event component="remote_fatalAdapter" name="AF_ASSERT_0" id="0x10004200" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-      </args>
-    </event>
-    <event component="remote_fatalAdapter" name="AF_ASSERT_1" id="0x10004201" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="remote_fatalAdapter" name="AF_ASSERT_2" id="0x10004202" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="remote_fatalAdapter" name="AF_ASSERT_3" id="0x10004203" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-        <arg name="arg3" description="Third assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="remote_fatalAdapter" name="AF_ASSERT_4" id="0x10004204" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-        <arg name="arg3" description="Third assert argument" type="U32"/>
-        <arg name="arg4" description="Fourth assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="remote_fatalAdapter" name="AF_ASSERT_5" id="0x10004205" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u %u %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-        <arg name="arg3" description="Third assert argument" type="U32"/>
-        <arg name="arg4" description="Fourth assert argument" type="U32"/>
-        <arg name="arg5" description="Fifth assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="remote_fatalAdapter" name="AF_ASSERT_6" id="0x10004206" severity="FATAL" description="An assert happened" format_string="Assert in file %s, line %u: %u %u %u %u %u %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="arg1" description="First assert argument" type="U32"/>
-        <arg name="arg2" description="Second assert argument" type="U32"/>
-        <arg name="arg3" description="Third assert argument" type="U32"/>
-        <arg name="arg4" description="Fourth assert argument" type="U32"/>
-        <arg name="arg5" description="Fifth assert argument" type="U32"/>
-        <arg name="arg6" description="Sixth assert argument" type="U32"/>
-      </args>
-    </event>
-    <event component="remote_fatalAdapter" name="AF_UNEXPECTED_ASSERT" id="0x10004207" severity="FATAL" description="An unexpected assert happened" format_string="Unexpected assert in file %s, line %u, args %u">
-      <args>
-        <arg name="file" description="The source file of the assert" len="80" type="string"/>
-        <arg name="line" description="Line number of the assert" type="U32"/>
-        <arg name="numArgs" description="Number of unexpected arguments" type="U32"/>
-      </args>
-    </event>
     <event component="remote_bufferManager" name="NoBuffsAvailable" id="0x10004400" severity="WARNING_HI" description="The BufferManager was unable to allocate a requested buffer" format_string="No available buffers of size %u">
       <args>
         <arg name="size" description="The requested size" type="U32"/>
@@ -1020,16 +861,6 @@
     </event>
     <event component="remote_bufferManager" name="ZeroSizeBuffer" id="0x10004401" severity="WARNING_HI" description="The buffer manager received a zero-sized buffer as a return. Probably undetected empty buffer allocation" format_string="Received zero size buffer">
       <args/>
-    </event>
-    <event component="remote_systemResources" name="FRAMEWORK_VERSION" id="0x10004a00" severity="ACTIVITY_LO" description="Version of the git repository." format_string="Framework Version: [%s]">
-      <args>
-        <arg name="version" description="version string" len="40" type="string"/>
-      </args>
-    </event>
-    <event component="remote_systemResources" name="PROJECT_VERSION" id="0x10004a01" severity="ACTIVITY_LO" description="Version of the git repository." format_string="Project Version: [%s]">
-      <args>
-        <arg name="version" description="version string" len="40" type="string"/>
-      </args>
     </event>
     <event component="remote_hubDriver" name="OpenError" id="0x10100300" severity="WARNING_HI" description="UART open error" format_string="Error opening UART device %s: %d %s">
       <args>
@@ -1082,34 +913,32 @@
     <channel component="rateGroup1" name="MaxCycleTime" id="0x1000" format_string="%u us" description="Max execution time of rate group cycle" type="U32"/>
     <channel component="rateGroup1" name="CycleTime" id="0x1001" format_string="%u us" description="Execution time of current cycle" type="U32"/>
     <channel component="rateGroup1" name="CycleCount" id="0x1002" description="Count of number of cycles" type="U32"/>
-    <channel component="systemResources" name="MEMORY_TOTAL" id="0x4900" format_string="%lu KB" description="Total system memory in KB" type="U64"/>
-    <channel component="systemResources" name="MEMORY_USED" id="0x4901" format_string="%lu KB" description="System memory used in KB" type="U64"/>
-    <channel component="systemResources" name="NON_VOLATILE_TOTAL" id="0x4902" format_string="%lu KB" description="System non-volatile available in KB" type="U64"/>
-    <channel component="systemResources" name="NON_VOLATILE_FREE" id="0x4903" format_string="%lu KB" description="System non-volatile available in KB" type="U64"/>
-    <channel component="systemResources" name="CPU" id="0x4904" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_00" id="0x4905" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_01" id="0x4906" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_02" id="0x4907" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_03" id="0x4908" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_04" id="0x4909" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_05" id="0x490a" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_06" id="0x490b" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_07" id="0x490c" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_08" id="0x490d" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_09" id="0x490e" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_10" id="0x490f" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_11" id="0x4910" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_12" id="0x4911" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_13" id="0x4912" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_14" id="0x4913" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="CPU_15" id="0x4914" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="systemResources" name="FRAMEWORK_VERSION" id="0x4915" description="Software framework version" len="40" type="string"/>
-    <channel component="systemResources" name="PROJECT_VERSION" id="0x4916" description="Software project version" len="40" type="string"/>
-    <channel component="bufferManager" name="TotalBuffs" id="0x4b00" description="The total buffers allocated" type="U32"/>
-    <channel component="bufferManager" name="CurrBuffs" id="0x4b01" description="The current number of allocated buffers" type="U32"/>
-    <channel component="bufferManager" name="HiBuffs" id="0x4b02" description="The high water mark of allocated buffers" type="U32"/>
-    <channel component="bufferManager" name="NoBuffs" id="0x4b03" description="The number of requests that couldn't return a buffer" high_red="1" type="U32"/>
-    <channel component="bufferManager" name="EmptyBuffs" id="0x4b04" description="The number of empty buffers returned" high_red="1" type="U32"/>
+    <channel component="bufferManager" name="TotalBuffs" id="0x2000" description="The total buffers allocated" type="U32"/>
+    <channel component="bufferManager" name="CurrBuffs" id="0x2001" description="The current number of allocated buffers" type="U32"/>
+    <channel component="bufferManager" name="HiBuffs" id="0x2002" description="The high water mark of allocated buffers" type="U32"/>
+    <channel component="bufferManager" name="NoBuffs" id="0x2003" description="The number of requests that couldn't return a buffer" high_red="1" type="U32"/>
+    <channel component="bufferManager" name="EmptyBuffs" id="0x2004" description="The number of empty buffers returned" high_red="1" type="U32"/>
+    <channel component="systemResources" name="MEMORY_TOTAL" id="0x4700" format_string="%lu KB" description="Total system memory in KB" type="U64"/>
+    <channel component="systemResources" name="MEMORY_USED" id="0x4701" format_string="%lu KB" description="System memory used in KB" type="U64"/>
+    <channel component="systemResources" name="NON_VOLATILE_TOTAL" id="0x4702" format_string="%lu KB" description="System non-volatile available in KB" type="U64"/>
+    <channel component="systemResources" name="NON_VOLATILE_FREE" id="0x4703" format_string="%lu KB" description="System non-volatile available in KB" type="U64"/>
+    <channel component="systemResources" name="CPU" id="0x4704" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_00" id="0x4705" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_01" id="0x4706" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_02" id="0x4707" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_03" id="0x4708" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_04" id="0x4709" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_05" id="0x470a" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_06" id="0x470b" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_07" id="0x470c" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_08" id="0x470d" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_09" id="0x470e" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_10" id="0x470f" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_11" id="0x4710" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_12" id="0x4711" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_13" id="0x4712" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_14" id="0x4713" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
+    <channel component="systemResources" name="CPU_15" id="0x4714" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
     <channel component="remote_blockDrv" name="BD_Cycles" id="0x10000100" description="Driver cycle count" type="U32"/>
     <channel component="remote_rateGroup1" name="RgMaxTime" id="0x10000200" format_string="%u us" description="Max execution time rate group" type="U32"/>
     <channel component="remote_rateGroup1" name="RgCycleSlips" id="0x10000201" description="Cycle slips for rate group" type="U32"/>
@@ -1129,8 +958,6 @@
     <channel component="remote_fileUplink" name="FilesReceived" id="0x10000a00" description="The total number of complete files received" type="U32"/>
     <channel component="remote_fileUplink" name="PacketsReceived" id="0x10000a01" description="The total number of packets received" type="U32"/>
     <channel component="remote_fileUplink" name="Warnings" id="0x10000a02" description="The total number of warnings issued" type="U32"/>
-    <channel component="remote_comDriver" name="BytesSent" id="0x10004000" description="Bytes Sent" type="U32"/>
-    <channel component="remote_comDriver" name="BytesRecv" id="0x10004001" description="Bytes Received" type="U32"/>
     <channel component="remote_bufferManager" name="TotalBuffs" id="0x10004400" description="The total buffers allocated" type="U32"/>
     <channel component="remote_bufferManager" name="CurrBuffs" id="0x10004401" description="The current number of allocated buffers" type="U32"/>
     <channel component="remote_bufferManager" name="HiBuffs" id="0x10004402" description="The high water mark of allocated buffers" type="U32"/>
@@ -1157,8 +984,6 @@
     <channel component="remote_systemResources" name="CPU_13" id="0x10004a12" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
     <channel component="remote_systemResources" name="CPU_14" id="0x10004a13" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
     <channel component="remote_systemResources" name="CPU_15" id="0x10004a14" format_string="%.2f percent" description="System's CPU Percentage" type="F32"/>
-    <channel component="remote_systemResources" name="FRAMEWORK_VERSION" id="0x10004a15" description="Software framework version" len="40" type="string"/>
-    <channel component="remote_systemResources" name="PROJECT_VERSION" id="0x10004a16" description="Software project version" len="40" type="string"/>
     <channel component="remote_hubDriver" name="BytesSent" id="0x10100300" description="Bytes Sent" type="U32"/>
     <channel component="remote_hubDriver" name="BytesRecv" id="0x10100301" description="Bytes Received" type="U32"/>
   </channels>

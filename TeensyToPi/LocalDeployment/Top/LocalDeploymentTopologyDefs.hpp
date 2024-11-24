@@ -1,30 +1,29 @@
 // ======================================================================
-// \title  RemoteDeploymentTopologyDefs.hpp
+// \title  LocalDeploymentTopologyDefs.hpp
 // \brief required header file containing the required definitions for the topology autocoder
 //
 // ======================================================================
-#ifndef REMOTEDEPLOYMENT_REMOTEDEPLOYMENTTOPOLOGYDEFS_HPP
-#define REMOTEDEPLOYMENT_REMOTEDEPLOYMENTTOPOLOGYDEFS_HPP
+#ifndef LOCALDEPLOYMENT_LOCALDEPLOYMENTTOPOLOGYDEFS_HPP
+#define LOCALDEPLOYMENT_LOCALDEPLOYMENTTOPOLOGYDEFS_HPP
 
-#include "Drv/BlockDriver/BlockDriver.hpp"
 #include "Fw/Types/MallocAllocator.hpp"
-#include "RemoteDeployment/Top/FppConstantsAc.hpp"
+#include "TeensyToPi/LocalDeployment/Top/FppConstantsAc.hpp"
 #include "Svc/FramingProtocol/FprimeProtocol.hpp"
-#include "Svc/Health/Health.hpp"
 
 // Definitions are placed within a namespace named after the deployment
-namespace RemoteDeployment {
+namespace LocalDeployment {
 
 /**
  * \brief required type definition to carry state
  *
- * The topology autocoder requires an object that carries state with the name `RemoteDeployment::TopologyState`. Only the type
- * definition is required by the autocoder and the contents of this object are otherwise opaque to the autocoder. The contents are entirely up
- * to the definition of the project. Here, they are derived from command line inputs.
+ * The topology autocoder requires an object that carries state with the name `LocalDeployment::TopologyState`. Only the type
+ * definition is required by the autocoder and the contents of this object are otherwise opaque to the autocoder. The
+ * contents are entirely up to the definition of the project. This reference application specifies hostname and port
+ * fields, which are derived by command line inputs.
  */
 struct TopologyState {
-    const CHAR* uartDevice;
-    U32 baudRate;
+    FwIndexType uartNumber;
+    PlatformIntType uartBaud;
 };
 
 /**
@@ -47,42 +46,18 @@ struct TopologyState {
  * ```
  */
 namespace PingEntries {
-namespace remote_blockDrv {
+namespace tlmSend {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace remote_tlmSend {
+namespace cmdDisp {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace remote_cmdDisp {
+namespace eventLogger {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace remote_cmdSeq {
-enum { WARN = 3, FATAL = 5 };
-}
-namespace remote_eventLogger {
-enum { WARN = 3, FATAL = 5 };
-}
-namespace remote_fileDownlink {
-enum { WARN = 3, FATAL = 5 };
-}
-namespace remote_fileManager {
-enum { WARN = 3, FATAL = 5 };
-}
-namespace remote_fileUplink {
-enum { WARN = 3, FATAL = 5 };
-}
-namespace remote_prmDb {
-enum { WARN = 3, FATAL = 5 };
-}
-namespace remote_rateGroup1 {
-enum { WARN = 3, FATAL = 5 };
-}
-namespace remote_rateGroup2 {
-enum { WARN = 3, FATAL = 5 };
-}
-namespace remote_rateGroup3 {
+namespace rateGroup1 {
 enum { WARN = 3, FATAL = 5 };
 }
 }  // namespace PingEntries
-}  // namespace RemoteDeployment
+}  // namespace LocalDeployment
 #endif

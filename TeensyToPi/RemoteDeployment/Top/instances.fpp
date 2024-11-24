@@ -8,7 +8,7 @@ module RemoteDeployment {
 
   module Default {
     constant QUEUE_SIZE = 10
-    constant STACK_SIZE = 64 * 1024
+    constant STACK_SIZE = 131072 + 4096 * 1
   }
 
   # ----------------------------------------------------------------------
@@ -79,7 +79,7 @@ module RemoteDeployment {
     stack size Default.STACK_SIZE \
     priority 97
 
-  #instance tlmSend: Svc.TlmPacketizer base id REMOTE_TOPOLOGY_BASE + 0x0C00 \
+  #instance remote_tlmSend: Svc.TlmPacketizer base id REMOTE_TOPOLOGY_BASE + 0x0C00 \
   #    queue size Default.QUEUE_SIZE \
   #    stack size Default.STACK_SIZE \
   #    priority 97
@@ -90,20 +90,8 @@ module RemoteDeployment {
     priority 96
 
   # ----------------------------------------------------------------------
-  # Queued component instances
-  # ----------------------------------------------------------------------
-
-  instance remote_health: Svc.Health base id REMOTE_TOPOLOGY_BASE + 0x2000 \
-    queue size 25
-
-  # ----------------------------------------------------------------------
   # Passive component instances
   # ----------------------------------------------------------------------
-
-  @ Communications driver. May be swapped with other com drivers like UART or TCP
-  instance remote_comDriver: Drv.LinuxUartDriver base id REMOTE_TOPOLOGY_BASE + 0x4000
-
-  instance remote_framer: Svc.Framer base id REMOTE_TOPOLOGY_BASE + 0x4100
 
   instance remote_fatalAdapter: Svc.AssertFatalAdapter base id REMOTE_TOPOLOGY_BASE + 0x4200
 
@@ -116,8 +104,6 @@ module RemoteDeployment {
   instance remote_rateGroupDriver: Svc.RateGroupDriver base id REMOTE_TOPOLOGY_BASE + 0x4600
 
   instance remote_textLogger: Svc.PassiveTextLogger base id REMOTE_TOPOLOGY_BASE + 0x4800
-
-  instance remote_deframer: Svc.Deframer base id REMOTE_TOPOLOGY_BASE + 0x4900
 
   instance remote_systemResources: Svc.SystemResources base id REMOTE_TOPOLOGY_BASE + 0x4A00
 
@@ -132,4 +118,5 @@ module RemoteDeployment {
   instance remote_hubDeframer: Svc.Deframer base id REMOTE_TOPOLOGY_BASE + 0x100200
 
   instance remote_hubDriver: Drv.LinuxUartDriver base id REMOTE_TOPOLOGY_BASE + 0x100300
+  
 }

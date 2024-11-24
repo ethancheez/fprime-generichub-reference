@@ -1,25 +1,33 @@
 <packets name="LocalDeploymentPackets" namespace="LocalDeployment" size="111">
 
-    <import_topology>LocalDeployment/Top/LocalDeploymentTopologyAppAi.xml</import_topology>
+    <import_topology>TeensyToPi/LocalDeployment/Top/LocalDeploymentTopologyAppAi.xml</import_topology>
 
     <packet name="CDH" id="1" level="1">
         <channel name="cmdDisp.CommandsDispatched"/>
         <channel name="rateGroup1.MaxCycleTime"/>
         <channel name="rateGroup1.CycleTime"/>
         <channel name="rateGroup1.CycleCount"/>
+        <channel name="bufferManager.TotalBuffs"/>
         <channel name="bufferManager.CurrBuffs"/>
         <channel name="bufferManager.HiBuffs"/>
+        <channel name="fileUplinkBufferManager.TotalBuffs"/>
+        <channel name="fileUplinkBufferManager.CurrBuffs"/>
+        <channel name="fileUplinkBufferManager.HiBuffs"/>
+        <channel name="fileUplink.FilesReceived"/>
+        <channel name="fileUplink.PacketsReceived"/>
+        <channel name="fileDownlink.FilesSent"/>
+        <channel name="fileDownlink.PacketsSent"/>
+        <channel name="fileManager.CommandsExecuted"/>
     </packet>
 
     <packet name="CDHErrors" id="2" level="1">
-        <channel name="bufferManager.TotalBuffs"/>
         <channel name="bufferManager.NoBuffs"/>
         <channel name="bufferManager.EmptyBuffs"/>
-    </packet>
-
-    <packet name="Comms" id="4" level="1">
-        <channel name="commQueue.comQueueDepth"/>
-        <channel name="commQueue.buffQueueDepth"/>
+        <channel name="fileUplinkBufferManager.NoBuffs"/>
+        <channel name="fileUplinkBufferManager.EmptyBuffs"/>
+        <channel name="fileUplink.Warnings"/>
+        <channel name="fileDownlink.Warnings"/>
+        <channel name="fileManager.Errors"/>
     </packet>
 
     <packet name="SystemRes1" id="5" level="2">
@@ -27,11 +35,6 @@
         <channel name="systemResources.MEMORY_USED"/>
         <channel name="systemResources.NON_VOLATILE_TOTAL"/>
         <channel name="systemResources.NON_VOLATILE_FREE"/>
-    </packet>
-
-    <packet name="SystemRes2" id="6" level="2">
-        <channel name="systemResources.FRAMEWORK_VERSION"/>
-        <channel name="systemResources.PROJECT_VERSION"/>
     </packet>
 
     <packet name="SystemRes3" id="7" level="2">

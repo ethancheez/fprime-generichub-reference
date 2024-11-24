@@ -2,6 +2,5 @@
 # This allows for reuse between deployments, or other projects.
 
 add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Components")
-add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/NativePiDeployment/")
-add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RemoteDeployment/")
-add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/LocalDeployment/")
+add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/TeensyToPi/LocalDeployment/")
+add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/TeensyToPi/RemoteDeployment/")

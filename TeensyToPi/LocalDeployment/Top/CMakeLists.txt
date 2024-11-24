@@ -7,16 +7,14 @@
 
 set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/instances.fpp"
-  "${CMAKE_CURRENT_LIST_DIR}/RemoteDeploymentPackets.xml"
+  # "${CMAKE_CURRENT_LIST_DIR}/LocalDeploymentPackets.xml"
   "${CMAKE_CURRENT_LIST_DIR}/topology.fpp"
-  "${CMAKE_CURRENT_LIST_DIR}/RemoteDeploymentTopology.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/LocalDeploymentTopology.cpp"
 )
 set(MOD_DEPS
   Fw/Logger
-  Svc/PosixTime
-  # Communication Implementations
-  Drv/Udp
-  Drv/LinuxUartDriver
+  Arduino/Drv/StreamDriver
+  fprime-baremetal/Os/TaskRunner
 )
 
 register_fprime_module()

@@ -4,8 +4,8 @@
 //
 // ======================================================================
 // Provides access to autocoded functions
-#include <LocalDeployment/Top/LocalDeploymentTopologyAc.hpp>
-#include <LocalDeployment/Top/LocalDeploymentPacketsAc.hpp>
+#include <TeensyToPi/LocalDeployment/Top/LocalDeploymentTopologyAc.hpp>
+#include <TeensyToPi/LocalDeployment/Top/LocalDeploymentPacketsAc.hpp>
 #include <config/FppConstantsAc.hpp>
 
 // Necessary project-specified types
@@ -66,18 +66,18 @@ void configureTopology() {
     // Rate groups require context arrays.
     rateGroup1.configure(rateGroup1Context, FW_NUM_ARRAY_ELEMENTS(rateGroup1Context));
 
-    // Buffer managers need a configured set of buckets and an allocator used to allocate memory for those buckets.
-    Svc::BufferManager::BufferBins upBuffMgrBins;
-    memset(&upBuffMgrBins, 0, sizeof(upBuffMgrBins));
-    upBuffMgrBins.bins[0].bufferSize = FRAMER_BUFFER_SIZE;
-    upBuffMgrBins.bins[0].numBuffers = FRAMER_BUFFER_COUNT;
-    upBuffMgrBins.bins[1].bufferSize = DEFRAMER_BUFFER_SIZE;
-    upBuffMgrBins.bins[1].numBuffers = DEFRAMER_BUFFER_COUNT;
-    upBuffMgrBins.bins[2].bufferSize = COM_DRIVER_BUFFER_SIZE;
-    upBuffMgrBins.bins[2].numBuffers = COM_DRIVER_BUFFER_COUNT;
-    bufferManager.setup(BUFFER_MANAGER_ID, 0, mallocator, upBuffMgrBins);
+    // Set up BufferManager
+    Svc::BufferManager::BufferBins buffMgrBins;
+    memset(&buffMgrBins, 0, sizeof(buffMgrBins));
+    buffMgrBins.bins[0].bufferSize = FRAMER_BUFFER_SIZE;
+    buffMgrBins.bins[0].numBuffers = FRAMER_BUFFER_COUNT;
+    buffMgrBins.bins[1].bufferSize = DEFRAMER_BUFFER_SIZE;
+    buffMgrBins.bins[1].numBuffers = DEFRAMER_BUFFER_COUNT;
+    buffMgrBins.bins[2].bufferSize = COM_DRIVER_BUFFER_SIZE;
+    buffMgrBins.bins[2].numBuffers = COM_DRIVER_BUFFER_COUNT;
+    bufferManager.setup(BUFFER_MANAGER_ID, 0, mallocator, buffMgrBins);
 
-     // Set up ComQueue
+    // Set up ComQueue
     Svc::ComQueue::QueueConfigurationTable configurationTable;
     // Channels, deep queue, low priority
     configurationTable.entries[0] = {.depth = 500, .priority = 0};

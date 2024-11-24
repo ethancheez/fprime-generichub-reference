@@ -4,7 +4,9 @@
 //
 // ======================================================================
 // Used to access topology functions
-#include <NativePiDeployment/Top/NativePiDeploymentTopology.hpp>
+#include <TeensyToPi/RemoteDeployment/Top/RemoteDeploymentTopology.hpp>
+// OSAL initialization
+#include <Os/Os.hpp>
 // Used for signal handling shutdown
 #include <signal.h>
 // Used for command line argument processing
@@ -20,7 +22,7 @@
  * @param app: name of application
  */
 void print_usage(const char* app) {
-    (void)printf("Usage: ./%s [options]\n-a\thostname/IP address\n-p\tport_number\n", app);
+    (void)printf("Usage: ./%s [options]\n-b\tBaud rate\n-d\tUART Device\n", app);
 }
 
 /**
@@ -32,7 +34,7 @@ void print_usage(const char* app) {
  * @param signum
  */
 static void signalHandler(int signum) {
-    NativePiDeployment::stopSimulatedCycle();
+    RemoteDeployment::stopSimulatedCycle();
 }
 
 /**
@@ -47,19 +49,20 @@ static void signalHandler(int signum) {
  */
 int main(int argc, char* argv[]) {
     I32 option = 0;
-    CHAR* hostname = nullptr;
-    U16 port_number = 0;
+    CHAR* uart_device = nullptr;
+    U32 baud_rate = 0;
+    Os::init();
 
     // Loop while reading the getopt supplied options
-    while ((option = getopt(argc, argv, "hp:a:")) != -1) {
+    while ((option = getopt(argc, argv, "hb:d:")) != -1) {
         switch (option) {
-            // Handle the -a argument for address/hostname
-            case 'a':
-                hostname = optarg;
+            // Handle the -b baud rate argument
+            case 'b':
+                baud_rate = static_cast<U32>(atoi(optarg));
                 break;
-            // Handle the -p port number argument
-            case 'p':
-                port_number = static_cast<U16>(atoi(optarg));
+            // Handle the -d device argument
+            case 'd':
+                uart_device = optarg;
                 break;
             // Cascade intended: help output
             case 'h':
@@ -72,9 +75,9 @@ int main(int argc, char* argv[]) {
         }
     }
     // Object for communicating state to the reference topology
-    NativePiDeployment::TopologyState inputs;
-    inputs.hostname = hostname;
-    inputs.port = port_number;
+    RemoteDeployment::TopologyState inputs;
+    inputs.baudRate = baud_rate;
+    inputs.uartDevice = uart_device;
 
     // Setup program shutdown via Ctrl-C
     signal(SIGINT, signalHandler);
@@ -82,9 +85,9 @@ int main(int argc, char* argv[]) {
     (void)printf("Hit Ctrl-C to quit\n");
 
     // Setup, cycle, and teardown topology
-    NativePiDeployment::setupTopology(inputs);
-    NativePiDeployment::startSimulatedCycle(1000);  // Program loop cycling rate groups at 1Hz
-    NativePiDeployment::teardownTopology(inputs);
+    RemoteDeployment::setupTopology(inputs);
+    RemoteDeployment::startSimulatedCycle(Fw::TimeInterval(1,0));  // Program loop cycling rate groups at 1Hz
+    RemoteDeployment::teardownTopology(inputs);
     (void)printf("Exiting...\n");
     return 0;
 }

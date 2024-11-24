@@ -1,30 +1,30 @@
 // ======================================================================
-// \title  NativePiDeploymentTopologyDefs.hpp
+// \title  RemoteDeploymentTopologyDefs.hpp
 // \brief required header file containing the required definitions for the topology autocoder
 //
 // ======================================================================
-#ifndef NATIVEPIDEPLOYMENT_NATIVEPIDEPLOYMENTTOPOLOGYDEFS_HPP
-#define NATIVEPIDEPLOYMENT_NATIVEPIDEPLOYMENTTOPOLOGYDEFS_HPP
+#ifndef REMOTEDEPLOYMENT_REMOTEDEPLOYMENTTOPOLOGYDEFS_HPP
+#define REMOTEDEPLOYMENT_REMOTEDEPLOYMENTTOPOLOGYDEFS_HPP
 
 #include "Drv/BlockDriver/BlockDriver.hpp"
 #include "Fw/Types/MallocAllocator.hpp"
-#include "NativePiDeployment/Top/FppConstantsAc.hpp"
+#include "TeensyToPi/RemoteDeployment/Top/FppConstantsAc.hpp"
 #include "Svc/FramingProtocol/FprimeProtocol.hpp"
 #include "Svc/Health/Health.hpp"
 
 // Definitions are placed within a namespace named after the deployment
-namespace NativePiDeployment {
+namespace RemoteDeployment {
 
 /**
  * \brief required type definition to carry state
  *
- * The topology autocoder requires an object that carries state with the name `NativePiDeployment::TopologyState`. Only the type
+ * The topology autocoder requires an object that carries state with the name `RemoteDeployment::TopologyState`. Only the type
  * definition is required by the autocoder and the contents of this object are otherwise opaque to the autocoder. The contents are entirely up
  * to the definition of the project. Here, they are derived from command line inputs.
  */
 struct TopologyState {
-    const CHAR* hostname;
-    U16 port;
+    const CHAR* uartDevice;
+    U32 baudRate;
 };
 
 /**
@@ -47,42 +47,42 @@ struct TopologyState {
  * ```
  */
 namespace PingEntries {
-namespace blockDrv {
+namespace RemoteDeployment_blockDrv {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace tlmSend {
+namespace RemoteDeployment_tlmSend {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace cmdDisp {
+namespace RemoteDeployment_cmdDisp {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace cmdSeq {
+namespace RemoteDeployment_cmdSeq {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace eventLogger {
+namespace RemoteDeployment_eventLogger {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace fileDownlink {
+namespace RemoteDeployment_fileDownlink {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace fileManager {
+namespace RemoteDeployment_fileManager {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace fileUplink {
+namespace RemoteDeployment_fileUplink {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace prmDb {
+namespace RemoteDeployment_prmDb {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace rateGroup1 {
+namespace RemoteDeployment_rateGroup1 {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace rateGroup2 {
+namespace RemoteDeployment_rateGroup2 {
 enum { WARN = 3, FATAL = 5 };
 }
-namespace rateGroup3 {
+namespace RemoteDeployment_rateGroup3 {
 enum { WARN = 3, FATAL = 5 };
 }
 }  // namespace PingEntries
-}  // namespace NativePiDeployment
+}  // namespace RemoteDeployment
 #endif
